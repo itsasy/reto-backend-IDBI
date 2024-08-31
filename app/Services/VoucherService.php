@@ -49,6 +49,42 @@ class VoucherService
     }
 
     /**
+     * @param string $id
+     * @return Model|Voucher
+     * @throws \Exception
+     */
+    public function deleteVoucher(string $id)
+    {
+        $voucher = Voucher::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$voucher) {
+            throw new \Exception('Voucher not found');
+        }
+
+        $voucher->delete();
+
+        return $voucher;
+    }
+
+    /**
+     * @param string|null $currency
+     * @return array
+     */
+    public function getTotalAmounts(?string $currency = null): array
+    {
+        return Voucher::selectRaw('currency, SUM(total_amount) as total_amount')
+            ->when($currency, function ($query, $currency) {
+                return $query->where('currency', $currency);
+            })
+            ->groupBy('currency')
+            ->pluck('total_amount', 'currency')
+            ->where('user_id', auth()->id())
+            ->toArray();
+    }
+
+    /**
      * @param string[] $xmlContents
      * @param User $user
      * @return Voucher[]
@@ -125,39 +161,6 @@ class VoucherService
         }
 
         return $voucher;
-    }
-
-    /**
-     * @param string $id
-     * @return Voucher|Voucher[]|Collection|Model
-     * @throws \Exception
-     */
-    public function deleteVoucher(string $id)
-    {
-        $voucher = Voucher::find($id);
-
-        if (!$voucher) {
-            throw new \Exception('Voucher not found');
-        }
-
-        $voucher->delete();
-
-        return $voucher;
-    }
-
-    /**
-     * @param string|null $currency
-     * @return array
-     */
-    public function getTotalAmounts(?string $currency = null): array
-    {
-        return Voucher::selectRaw('currency, SUM(total_amount) as total_amount')
-            ->when($currency, function ($query, $currency) {
-                return $query->where('currency', $currency);
-            })
-            ->groupBy('currency')
-            ->pluck('total_amount', 'currency')
-            ->toArray();
     }
 
     /**
