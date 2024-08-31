@@ -136,4 +136,19 @@ class VoucherService
 
         return $voucher;
     }
+
+    /**
+     * @param string|null $currency
+     * @return array
+     */
+    public function getTotalAmounts(?string $currency = null): array
+    {
+        return Voucher::selectRaw('currency, SUM(total_amount) as total_amount')
+            ->when($currency, function ($query, $currency) {
+                return $query->where('currency', $currency);
+            })
+            ->groupBy('currency')
+            ->pluck('total_amount', 'currency')
+            ->toArray();
+    }
 }
