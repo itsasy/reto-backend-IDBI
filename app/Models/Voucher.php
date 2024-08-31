@@ -14,6 +14,10 @@ use Illuminate\Support\Collection;
 
 /**
  * @property string $id
+ * @property string $serie
+ * @property string $number
+ * @property string $type
+ * @property string $currency
  * @property string $issuer_name
  * @property string $issuer_document_type
  * @property string $issuer_document_number
@@ -37,6 +41,10 @@ class Voucher extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'serie',
+        'number',
+        'type',
+        'currency',
         'issuer_name',
         'issuer_document_type',
         'issuer_document_number',

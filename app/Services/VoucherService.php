@@ -39,17 +39,27 @@ class VoucherService
     {
         $xml = new SimpleXMLElement($xmlContent);
 
-        $issuerName = (string) $xml->xpath('//cac:AccountingSupplierParty/cac:Party/cac:PartyName/cbc:Name')[0];
-        $issuerDocumentType = (string) $xml->xpath('//cac:AccountingSupplierParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID')[0];
-        $issuerDocumentNumber = (string) $xml->xpath('//cac:AccountingSupplierParty/cac:Party/cac:PartyIdentification/cbc:ID')[0];
+        $serie = (string)$xml->xpath('//cbc:ID')[0];
+        $number = (string)$xml->xpath('//cbc:ID')[1];
+        $type = (string)$xml->xpath('//cbc:InvoiceTypeCode')[0];
+        $currency = (string)$xml->xpath('//cbc:DocumentCurrencyCode')[0];
 
-        $receiverName = (string) $xml->xpath('//cac:AccountingCustomerParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName')[0];
-        $receiverDocumentType = (string) $xml->xpath('//cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID')[0];
-        $receiverDocumentNumber = (string) $xml->xpath('//cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID')[0];
 
-        $totalAmount = (string) $xml->xpath('//cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount')[0];
+        $issuerName = (string)$xml->xpath('//cac:AccountingSupplierParty/cac:Party/cac:PartyName/cbc:Name')[0];
+        $issuerDocumentType = (string)$xml->xpath('//cac:AccountingSupplierParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID')[0];
+        $issuerDocumentNumber = (string)$xml->xpath('//cac:AccountingSupplierParty/cac:Party/cac:PartyIdentification/cbc:ID')[0];
+
+        $receiverName = (string)$xml->xpath('//cac:AccountingCustomerParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName')[0];
+        $receiverDocumentType = (string)$xml->xpath('//cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID')[0];
+        $receiverDocumentNumber = (string)$xml->xpath('//cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID')[0];
+
+        $totalAmount = (string)$xml->xpath('//cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount')[0];
 
         $voucher = new Voucher([
+            'serie' => $serie,
+            'number' => $number,
+            'type' => $type,
+            'currency' => $currency,
             'issuer_name' => $issuerName,
             'issuer_document_type' => $issuerDocumentType,
             'issuer_document_number' => $issuerDocumentNumber,
@@ -63,9 +73,9 @@ class VoucherService
         $voucher->save();
 
         foreach ($xml->xpath('//cac:InvoiceLine') as $invoiceLine) {
-            $name = (string) $invoiceLine->xpath('cac:Item/cbc:Description')[0];
-            $quantity = (float) $invoiceLine->xpath('cbc:InvoicedQuantity')[0];
-            $unitPrice = (float) $invoiceLine->xpath('cac:Price/cbc:PriceAmount')[0];
+            $name = (string)$invoiceLine->xpath('cac:Item/cbc:Description')[0];
+            $quantity = (float)$invoiceLine->xpath('cbc:InvoicedQuantity')[0];
+            $unitPrice = (float)$invoiceLine->xpath('cac:Price/cbc:PriceAmount')[0];
 
             $voucherLine = new VoucherLine([
                 'name' => $name,
