@@ -19,6 +19,35 @@ class VoucherService
     }
 
     /**
+     * @param array $values
+     * @return Collection
+     */
+    public function getVoucher(array $values): Collection
+    {
+        $queryBuilder = Voucher::query();
+
+        if (!empty($values['serie'])) {
+            $queryBuilder->where('serie', $values['serie']);
+        }
+
+        if (!empty($values['number'])) {
+            $queryBuilder->where('number', $values['number']);
+        }
+
+        if (!empty($values['start_date'])) {
+            $queryBuilder->where('start_date', '>=', $values['start_date']);
+        }
+
+        if (!empty($values['end_date'])) {
+            $queryBuilder->where('end_date', '<=', $values['end_date']);
+        }
+
+        $queryBuilder->where('user_id', auth()->id());
+
+        return $queryBuilder->get();
+    }
+
+    /**
      * @param string[] $xmlContents
      * @param User $user
      * @return Voucher[]
