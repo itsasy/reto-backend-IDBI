@@ -8,10 +8,10 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('vouchers', function (Blueprint $table) {
-            $table->string('serie')->nullable();
-            $table->string('number')->nullable();
-            $table->string('type')->nullable();
-            $table->string('currency')->nullable();
+            $table->string('serie')->nullable()->after('id');
+            $table->string('number')->nullable()->after('serie');
+            $table->string('type')->nullable()->after('number');
+            $table->string('currency')->nullable()->after('type');
         });
     }
 
