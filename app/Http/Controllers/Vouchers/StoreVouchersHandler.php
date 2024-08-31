@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers\Vouchers;
 
-use App\Http\Resources\Vouchers\VoucherResource;
-use App\Services\VoucherService;
+use App\Jobs\ProcessVoucherUploadJob;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class StoreVouchersHandler
 {
-    public function __construct(private readonly VoucherService $voucherService)
+    public function __construct()
     {
     }
 
@@ -29,10 +28,11 @@ class StoreVouchersHandler
             }
 
             $user = auth()->user();
-            $vouchers = $this->voucherService->storeVouchersFromXmlContents($xmlContents, $user);
+
+            ProcessVoucherUploadJob::dispatch($xmlContents, $user);
 
             return response([
-                'data' => VoucherResource::collection($vouchers),
+                'data' => 'The vouchers are being processed, you will receive an email when the process is finished.',
             ], 201);
         } catch (Exception $exception) {
             return response([

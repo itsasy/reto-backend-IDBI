@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Events\Vouchers\VouchersCreated;
+use App\Events\Vouchers\VouchersNotCreated;
 use App\Models\User;
 use App\Models\Voucher;
 use App\Models\VoucherLine;
@@ -55,11 +56,18 @@ class VoucherService
     public function storeVouchersFromXmlContents(array $xmlContents, User $user): array
     {
         $vouchers = [];
+        $failedVouchers = [];
+
         foreach ($xmlContents as $xmlContent) {
-            $vouchers[] = $this->storeVoucherFromXmlContent($xmlContent, $user);
+            try {
+                $vouchers[] = $this->storeVoucherFromXmlContent($xmlContent, $user);
+            } catch (\Exception $e) {
+                $failedVouchers[] = $this->saveFailedVoucherReason($xmlContent, $e->getMessage());
+            }
         }
 
         VouchersCreated::dispatch($vouchers, $user);
+        VouchersNotCreated::dispatch($failedVouchers, $user);
 
         return $vouchers;
     }
@@ -150,5 +158,24 @@ class VoucherService
             ->groupBy('currency')
             ->pluck('total_amount', 'currency')
             ->toArray();
+    }
+
+    /**
+     * @param string $xmlContent
+     * @param string $reason
+     * @return string[]
+     */
+    private function saveFailedVoucherReason(string $xmlContent, string $reason): array
+    {
+        $xml = new SimpleXMLElement($xmlContent);
+
+        $serie = (string)$xml->xpath('//cbc:ID')[0];
+        $number = (string)$xml->xpath('//cbc:ID')[1];
+
+        return [
+            'serie' => $serie ?? 'N/A',
+            'number' => $number ?? 'N/A',
+            'error_reason' => $reason,
+        ];
     }
 }
