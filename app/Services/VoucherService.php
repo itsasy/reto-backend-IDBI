@@ -36,17 +36,18 @@ class VoucherService
         }
 
         if (!empty($values['start_date'])) {
-            $queryBuilder->where('start_date', '>=', $values['start_date']);
+            $queryBuilder->whereDate('created_at', '>=', $values['start_date']);
         }
 
         if (!empty($values['end_date'])) {
-            $queryBuilder->where('end_date', '<=', $values['end_date']);
+            $queryBuilder->whereDate('created_at', '<=', $values['end_date']);
         }
 
         $queryBuilder->where('user_id', auth()->id());
 
         return $queryBuilder->get();
     }
+
 
     /**
      * @param string $id
@@ -80,7 +81,6 @@ class VoucherService
             })
             ->groupBy('currency')
             ->pluck('total_amount', 'currency')
-            ->where('user_id', auth()->id())
             ->toArray();
     }
 
