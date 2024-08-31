@@ -95,7 +95,7 @@ class VoucherService
         $voucher = new Voucher([
             'serie' => $serie,
             'number' => $number,
-            'type' => $type,
+            'type' => $this->humanizeVoucherType($type),
             'currency' => $currency,
             'issuer_name' => $issuerName,
             'issuer_document_type' => $issuerDocumentType,
@@ -176,6 +176,49 @@ class VoucherService
             'serie' => $serie ?? 'N/A',
             'number' => $number ?? 'N/A',
             'error_reason' => $reason,
+        ];
+    }
+
+    /**
+     *
+     * @param string $code
+     * @return string
+     * @throws \InvalidArgumentException
+     */
+    private function humanizeVoucherType(string $code): string
+    {
+        $types = $this->getVoucherTypes();
+
+        $this->validateCode($code, $types);
+
+        return $types[$code];
+    }
+
+    /**
+     *
+     * @param string $code
+     * @param array $types .
+     * @return void
+     * @throws \InvalidArgumentException.
+     */
+    private function validateCode(string $code, array $types): void
+    {
+        if (!array_key_exists($code, $types)) {
+            throw new \InvalidArgumentException('Código de comprobante inválido.');
+        }
+    }
+
+    /**
+     *
+     * @return array
+     */
+    private function getVoucherTypes(): array
+    {
+        return [
+            '01' => 'Factura',
+            '03' => 'Boleta',
+            '07' => 'Nota de crédito',
+            '08' => 'Nota de débito',
         ];
     }
 }
